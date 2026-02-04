@@ -1,0 +1,60 @@
+name: Deploy Flutter Web to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]  # or master, depending on your default branch
+  workflow_dispatch:  # allows manual trigger
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.0'  # or 'stable' for latest stable
+          channel: 'stable'
+      
+      - name: Get dependencies
+        run: flutter pub get
+      
+      - name: Build web
+        run: flutter build web --release --base-href "/portfolio/"
+      
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build/web
+
+
+# ```
+
+# ## Step 2: Important - Replace `<REPO_NAME>`
+
+# In the `--base-href` flag, replace `<REPO_NAME>` with your actual repository name:
+# - If your repo is `https://github.com/username/my-flutter-app`
+# - Use: `--base-href "/my-flutter-app/"`
+
+# **Exception:** If you're using a custom domain or username.github.io repo, use `--base-href "/"` instead.
+
+# ## Step 3: Configure GitHub Pages
+
+# 1. Go to your GitHub repo → **Settings** → **Pages**
+# 2. Under "Source", select **Deploy from a branch**
+# 3. Select branch: **gh-pages** and folder: **/ (root)**
+# 4. Click **Save**
+
+# ## Step 4: Add build folder to .gitignore
+
+# Make sure `build/` is in your `.gitignore`:
+# ```
+# # Flutter build output
+# build/
